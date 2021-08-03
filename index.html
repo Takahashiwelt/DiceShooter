@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>crisp-game-lib</title>
+  <meta name="viewport" content="width=device-width, height=device-height,
+    user-scalable=no, initial-scale=1, maximum-scale=1" />
+  <script src="https://unpkg.com/sounds-some-sounds@1.0.5/build/index.js"></script>
+  <script src="https://unpkg.com/gif-capture-canvas@1.1.0/build/index.js"></script>
+  <script src="https://unpkg.com/terser@4.6.11/dist/bundle.min.js"></script>
+  <script src="https://unpkg.com/pixi.js@5.3.0/dist/pixi.min.js"></script>
+  <script src="https://unpkg.com/pixi-filters@3.1.1/dist/pixi-filters.js"></script>
+  <script>
+    var module = {};
+  </script>
+  <script src="https://unpkg.com/lodash.clonedeep@4.5.0/index.js"></script>
+  <script src="https://abagames.github.io/crisp-game-lib/bundle.js"></script>
+
+  <script>
+    title = "Dice Gun";
+
+    description = `
+[Mouse] move
+[Push] shot
+`;
+
+    characters = [
+      `
+ ggg
+ gbb
+ ggg
+ lllll
+ gl l 
+ g g
+`,
+      `
+rr
+grr
+lgr
+ r
+r r
+`,
+    ];
+
+    options = {
+      viewSize: { x: 100, y: 70 },
+      isPlayingBgm: true,
+      isReplayEnabled: true,
+      theme: "shapeDark",
+      seed: 9,
+    };
+    let x = 0;
+    let y = 0;
+    let dice = 0;
+    let spread = 0.2;
+    const dices = [];
+    const enemys = [];
+
+    function update() {
+      if (!ticks) {
+        dices.length = 0;
+        enemys.length = 0;
+      }
+
+
+
+
+      if (input.pos) {
+        x = input.pos.x;
+        y = input.pos.y;
+        if (y > 66) {
+          y = 66;
+        } else if (y < 14) {
+          y = 14;
+        }
+      }
+
+      if (ticks % 180 == 1) dice = 1;
+      else if (ticks % 180 == 31) dice = 2;
+      else if (ticks % 180 == 61) dice = 3;
+      else if (ticks % 180 == 91) dice = 4;
+      else if (ticks % 180 == 121) dice = 5;
+      else if (ticks % 180 == 151) dice = 6;
+
+      color("blue");
+      if (input.isJustPressed) {
+        play("laser");
+        dices.forEach(e => {
+          if (e == dice) {
+            play("explosion");
+            end();
+          }
+        })
+
+        if (dice % 2 == 1) {
+          bar(30, y + 1, 100, 1, PI, 0.8);
+          if (dice >= 3) {
+            bar(30, y + 5, 100, 1, -(PI - spread), 0.8);
+            bar(30, y - 3, 100, 1, PI - spread, 0.8);
+            if (dice >= 5) {
+              bar(30, y + 11, 100, 1, -(PI - spread - spread), 0.8);
+              bar(30, y - 9, 100, 1, PI - spread - spread, 0.8);
+            }
+          }
+        } else {
+          bar(30, y + 4, 100, 1, -(PI - spread), 0.8);
+          bar(30, y - 3, 100, 1, (PI - spread), 0.8);
+          if (dice >= 4) {
+            bar(30, y + 10, 100, 1, -(PI - spread - spread), 0.8);
+            bar(30, y - 9, 100, 1, (PI - spread - spread), 0.8);
+            if (dice >= 6) {
+              bar(30, y + 16, 100, 1, -(PI - spread - spread - spread), 0.8);
+              bar(30, y - 15, 100, 1, (PI - spread - spread - spread), 0.8);
+            }
+          }
+        }
+
+
+
+        ticks = 0;
+        dices.push(dice);
+
+      }
+      color("black");
+      dices.forEach(e => {
+        if (e == dice) {
+          color("red");
+        }
+      })
+      if (!input.isJustPressed) {
+        if (dice % 2 == 1) {
+          bar(30, y + 1, 10, 1, PI, 0);
+          if (dice >= 3) {
+            bar(30, y + 5, 10, 1, -(PI - spread), 0);
+            bar(30, y - 3, 10, 1, PI - spread, 0);
+            if (dice >= 5) {
+              bar(30, y + 11, 10, 1, -(PI - spread - spread), 0);
+              bar(30, y - 9, 10, 1, PI - spread - spread, 0);
+            }
+          }
+        } else {
+          bar(30, y + 4, 10, 1, -(PI - spread), 0);
+          bar(30, y - 3, 10, 1, (PI - spread), 0);
+          if (dice >= 4) {
+            bar(30, y + 10, 10, 1, -(PI - spread - spread), 0);
+            bar(30, y - 9, 10, 1, (PI - spread - spread), 0);
+            if (dice >= 6) {
+              bar(30, y + 16, 10, 1, -(PI - spread - spread - spread), 0);
+              bar(30, y - 15, 10, 1, (PI - spread - spread - spread), 0);
+            }
+          }
+        }
+      }
+      text(String(dice), 50, 3);
+
+      color("black");
+      char("a", 5, y);
+
+      //敵
+
+      enemys.forEach(e => {
+        remove(enemys, e => {
+          if (char("b", e.pos.x, e.pos.y).isColliding.rect.blue) {
+            addScore(1);
+            color("red");
+            particle(e.pos.x, e.pos.y, 6);
+            return true;
+          }
+        })
+
+        e.pos.x -= e.speed * difficulty;
+        if (e.pos.x <= 3) {
+          end();
+        }
+      })
+
+
+
+
+
+      if (dices.length >= 3) {
+        play("jump");
+        dices.length = 0;
+      }
+
+      if (ticks % 60 == 0) {
+        const s = {
+          pos: vec(100, rnd(12, 68)),
+          speed: rnd(0.15, 0.25),
+        }
+        enemys.push(s);
+      }
+
+    }
+
+
+
+    addEventListener("load", onLoad);
+  </script>
+
+</head>
+
+<body style="background: #ddd"></body>
+
+</html>
