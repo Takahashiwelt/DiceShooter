@@ -1,5 +1,5 @@
 # DiceGun
-![DiceGun](https://user-images.githubusercontent.com/25281086/127986754-55f5c4ee-4e0a-45d1-9357-f8bee371fafc.gif,width="200" height="200")
+![DiceGun](https://user-images.githubusercontent.com/25281086/127986754-55f5c4ee-4e0a-45d1-9357-f8bee371fafc.gif)
 # Play
 https://takahashiwelt.github.io/DiceShooter/
 # 解説
